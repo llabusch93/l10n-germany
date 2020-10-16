@@ -1,0 +1,126 @@
+<odoo>
+    <data>
+        <template
+                id="correction_cancellation_adjustments"
+                priority="9999"
+                inherit_id="account.report_invoice_document">
+
+            <xpath
+                    expr="//div[hasclass('page')]/h2"
+                    position="attributes">
+
+                <attribute name="t-if">o.credit_type not in ("correction_invoice","cancellation_invoice")</attribute>
+
+            </xpath>
+
+            <xpath
+                    expr="//div[hasclass('page')]/h2"
+                    position="after">
+
+                <t t-if="o.credit_type in ('correction_invoice','cancellation_invoice')">
+
+                    <h2>
+                        <span t-field="o.credit_type"/>
+                        <span t-field="o.number"/>
+                    </h2>
+                    <span class="font-italic">
+                        <span>For the invoice</span>
+                        <span t-field="o.origin_invoice_id.number"/>
+                        <span>with the invoice date</span>
+                        <span t-field="o.origin_invoice_id.date_invoice"/>
+                    </span>
+
+                </t>
+
+            </xpath>
+
+            <xpath
+                    expr="//t[@t-set='current_subtotal'][2]"
+                    position="after">
+
+                <t
+                        t-set="current_subtotal"
+                        t-value="o._get_singed_value(current_subtotal)"/>
+
+            </xpath>
+
+            <xpath
+                    expr="//*[@t-field='line.price_unit']"
+                    position="attributes">
+
+                <attribute name="t-field"/>
+                <attribute name="t-esc">o._get_singed_value(line.price_unit)</attribute>
+                <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+
+            </xpath>
+
+            <xpath
+                    expr="//*[@t-field='line.price_subtotal']"
+                    position="attributes">
+
+                <attribute name="t-field"/>
+                <attribute name="t-esc">o._get_singed_value(line.price_subtotal)</attribute>
+                <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+
+            </xpath>
+
+            <xpath
+                    expr="//*[@t-field='line.price_total']"
+                    position="attributes">
+
+                <attribute name="t-field"/>
+                <attribute name="t-esc">o._get_singed_value(line.price_total)</attribute>
+                <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+
+            </xpath>
+
+            <xpath
+                    expr="//*[@t-field='o.amount_untaxed']"
+                    position="attributes">
+
+                <attribute name="t-field"/>
+                <attribute name="t-esc">o._get_singed_value(o.amount_untaxed)</attribute>
+                <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+
+            </xpath>
+
+            <xpath
+                    expr="//*[@t-field='o.amount_total']"
+                    position="attributes">
+
+                <attribute name="t-field"/>
+                <attribute name="t-esc">o._get_singed_value(o.amount_total)</attribute>
+                <attribute name="t-options">{"widget": "monetary", "display_currency": o.currency_id}</attribute>
+
+            </xpath>
+
+        </template>
+
+        <template
+                id="remove_payment_values"
+                inherit_id="account.report_invoice_document_with_payments">
+
+            <!-- Don't display any payment values on refunds, that is misleading... -->
+
+            <xpath
+                    expr="//*[@t-foreach='payments_vals']"
+                    position="attributes">
+
+                <attribute name="t-if">o.credit_type not in ("correction_invoice","cancellation_invoice")</attribute>
+
+            </xpath>
+
+            <xpath
+                    expr="//*[@t-if='len(payments_vals) > 0']"
+                    position="attributes">
+
+                <attribute
+                        name="t-if"
+                        add="and o.credit_type not in ('correction_invoice','cancellation_invoice')"
+                        separator=" "/>
+
+            </xpath>
+
+        </template>
+    </data>
+</odoo>
